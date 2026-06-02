@@ -283,7 +283,7 @@ app.post("/messages", async (req, res) => {
 // --- REST endpoints ----------------------------------------------------------
 
 app.get("/skills", async (req, res) => {
-  const limit = Math.min(parseInt(req.query.limit || "50", 10), 200);
+  const limit = Math.min(parseInt(req.query.limit || "50", 10), 1000);
   const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
   const filter = req.query.filter || "";
 
