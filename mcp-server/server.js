@@ -280,6 +280,36 @@ app.post("/messages", async (req, res) => {
   await transport.handlePostMessage(req, res);
 });
 
+// --- REST endpoints ----------------------------------------------------------
+
+app.get("/skills", async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit || "50", 10), 200);
+  const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
+  const filter = req.query.filter || "";
+
+  try {
+    const result = await toolListSkills({ filter: filter || undefined, limit, offset });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/skills/:skill_name", async (req, res) => {
+  const { skill_name } = req.params;
+
+  try {
+    const result = await toolGetSkill({ skill_name });
+    if (result.error) {
+      res.status(404).json(result);
+      return;
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`MCP Skills server listening on port ${PORT}`);
   console.log(`Skills directory: ${SKILLS_DIR}`);
