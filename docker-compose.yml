@@ -22,12 +22,6 @@ services:
     # volumes:
     #   - "${LOCAL_REPO_PATH}:/skills-repo:ro"
 
-    labels:
-      traefik.http.middlewares.mcp-skills-ratelimit.rateLimit.average: "100"
-      traefik.http.middlewares.mcp-skills-ratelimit.rateLimit.burst: "20"
-      traefik.http.middlewares.mcp-skills-ratelimit.rateLimit.period: "1m"
-      traefik.http.routers.mcp-skills.middlewares: "mcp-skills-ratelimit"
-
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
       interval: 30s
