@@ -1,0 +1,64 @@
+services:
+  mcp-skills:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+      args:
+        REPO_URL: https://github.com/mukul975/Anthropic-Cybersecurity-Skills.git
+        REPO_BRANCH: main
+    image: mcp-skills:latest
+    container_name: mcp-skills
+    restart: unless-stopped
+
+    environment:
+      PORT: "3000"
+      RATE_LIMIT_MAX: "100"
+      MCP_AUTH_TOKEN: "${MCP_AUTH_TOKEN}"
+      # Override repo paths if using a bind-mounted local clone instead of the
+      # image-baked copy (mount /skills-repo to enable):
+      SKILLS_DIR: "${SKILLS_DIR:-/skills-repo/skills}"
+      INDEX_PATH: "${INDEX_PATH:-/skills-repo/index.json}"
+
+    # Optional: mount a local clone to avoid rebuilding on every skill update.
+    # Uncomment and set LOCAL_REPO_PATH in .env or the host environment.
+    # volumes:
+    #   - "${LOCAL_REPO_PATH}:/skills-repo:ro"
+
+    networks:
+      - traefik-public
+
+    labels:
+      # ── Traefik ──────────────────────────────────────────────────────────────
+      traefik.enable: "true"
+      traefik.docker.network: "traefik-public"
+
+      # Router
+      traefik.http.routers.mcp-skills.rule: "Host(`mcp-skills.shyntai.com`)"
+      traefik.http.routers.mcp-skills.entrypoints: "websecure"
+      traefik.http.routers.mcp-skills.tls: "true"
+      traefik.http.routers.mcp-skills.tls.certresolver: "letsencrypt"
+      traefik.http.routers.mcp-skills.service: "mcp-skills"
+
+      # Service / load-balancer
+      traefik.http.services.mcp-skills.loadbalancer.server.port: "3000"
+
+      # Middleware: security headers
+      traefik.http.middlewares.mcp-skills-headers.headers.customResponseHeaders.X-Robots-Tag: "noindex,nofollow"
+      traefik.http.middlewares.mcp-skills-headers.headers.customResponseHeaders.X-Content-Type-Options: "nosniff"
+      traefik.http.middlewares.mcp-skills-headers.headers.customResponseHeaders.X-Frame-Options: "DENY"
+      traefik.http.routers.mcp-skills.middlewares: "mcp-skills-headers"
+
+      # ── Dokploy ──────────────────────────────────────────────────────────────
+      dokploy.managed: "true"
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  traefik-public:
+    external: true
+    name: traefik-public

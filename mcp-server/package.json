@@ -1,0 +1,20 @@
+{
+  "name": "cybersecurity-skills-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server exposing Anthropic Cybersecurity Skills repository via filesystem",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "gray-matter": "^4.0.3",
+    "zod": "^3.24.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
